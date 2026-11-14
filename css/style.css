@@ -431,6 +431,28 @@ button {
   outline-offset: -2px;
 }
 
+.known-row-result {
+  cursor: default;
+}
+
+.known-row-result:hover {
+  background: none;
+}
+
+/* "Read more" is the only navy besides the date range. */
+.read-more {
+  display: block;
+  width: fit-content;
+  margin-top: 2px;
+  padding: 2px 0;
+  color: var(--navy);
+  text-decoration: underline;
+}
+
+.read-more:focus-visible {
+  outline: 1px dotted var(--text);
+}
+
 .known-years {
   flex-shrink: 0;
   font-weight: 700;

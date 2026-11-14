@@ -71,6 +71,13 @@ test("What we know lists answers newest first and leaves out skips", () => {
   assert.deepEqual(rows.map((r) => r.index), [2, 0]);
 });
 
+test("every clue has a Wikipedia article for Read more", () => {
+  for (const clue of clues) {
+    assert.ok(typeof clue.wiki === "string" && clue.wiki.length > 0, `${clue.id} has no wiki article`);
+    assert.ok(!clue.wiki.includes(" "), `${clue.id}: use underscores in the wiki title`);
+  }
+});
+
 test("display text", () => {
   assert.equal(formatRange({ lo: 1971, hi: 1990 }, NOW), "1971–1990");
   assert.equal(formatRange({ lo: 1990, hi: 1990 }, NOW), "1990");

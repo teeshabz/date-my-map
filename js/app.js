@@ -110,19 +110,37 @@ function timeline(range) {
   );
 }
 
-function knownBox(label, extraClass = "") {
-  const rows = knownList(history, clueById).map((row) =>
+// While answering, each row is a button that goes back to that question.
+function questionRow(row) {
+  return h(
+    "button",
+    { class: "known-row", onclick: () => goBackTo(row.index), title: "Change this answer" },
+    h("span", {}, row.clue),
+    h("span", { class: "known-years" }, formatAnswerYears(row.from, row.to)),
+  );
+}
+
+// On the result, each row links to its Wikipedia article (in a new tab).
+function resultRow(row) {
+  return h(
+    "div",
+    { class: "known-row known-row-result" },
     h(
-      "li",
+      "span",
       {},
+      row.clue,
       h(
-        "button",
-        { class: "known-row", onclick: () => goBackTo(row.index), title: "Change this answer" },
-        h("span", {}, row.clue),
-        h("span", { class: "known-years" }, formatAnswerYears(row.from, row.to)),
+        "a",
+        { class: "read-more", href: `https://en.wikipedia.org/wiki/${encodeURIComponent(row.wiki)}`, target: "_blank", rel: "noopener" },
+        "Read more",
       ),
     ),
+    h("span", { class: "known-years" }, formatAnswerYears(row.from, row.to)),
   );
+}
+
+function knownBox(label, makeRow, extraClass = "") {
+  const rows = knownList(history, clueById).map((row) => h("li", {}, makeRow(row)));
   return h(
     "section",
     { class: `known ${extraClass}`.trim() },
@@ -182,7 +200,7 @@ function questionScreen(clue, range) {
       h("button", { class: "answer raised", onclick: () => answer(clue, "newer") }, clue.newer.label),
     ),
     h("button", { class: "skip", onclick: () => answer(clue, "skip") }, "Skip"),
-    knownBox("What we know"),
+    knownBox("What we know", questionRow),
   );
 }
 
@@ -195,7 +213,7 @@ function resultScreen(range) {
     h("p", { class: "result-intro" }, "Your map was made between"),
     h("p", { class: "range range-big" }, formatRange(range, NOW)),
     timeline(range),
-    knownBox("How we know", "known-result"),
+    knownBox("How we know", resultRow, "known-result"),
     h("button", { class: "again raised", onclick: goHome }, "Date another map"),
   );
 }

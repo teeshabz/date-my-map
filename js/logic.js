@@ -64,7 +64,7 @@ export function knownList(history, clueById) {
   history.forEach(({ id, choice }, index) => {
     if (choice === "skip") return;
     const answer = clueById[id][choice];
-    rows.push({ index, clue: answer.clue, from: answer.from, to: answer.to });
+    rows.push({ index, clue: answer.clue, from: answer.from, to: answer.to, wiki: clueById[id].wiki });
   });
   return rows.reverse();
 }
