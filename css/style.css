@@ -1,0 +1,218 @@
+/* Date My Map: minimal Windows 98. Navy is used only for the date range. */
+
+:root {
+  --bg: #c0c0c0;
+  --text: #000000;
+  --text-2: #202020;
+  --text-3: #404040;
+  --navy: #000080;
+  --white: #ffffff;
+
+  --pixel: "DotGothic16", ui-monospace, monospace;
+  --body: "Arimo", Arial, Helvetica, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+/* ── Screen ─────────────────────────────────────────────────────────────── */
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  max-width: 430px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: 56px 20px 28px;
+  padding-bottom: max(28px, env(safe-area-inset-bottom));
+}
+
+/* ── Building blocks ────────────────────────────────────────────────────── */
+
+.raised {
+  background: var(--bg);
+  border: 2px solid;
+  border-color: #ffffff #404040 #404040 #ffffff;
+  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #dfdfdf;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.raised:active {
+  border-color: #404040 #ffffff #ffffff #404040;
+  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #dfdfdf;
+}
+
+.raised:focus-visible {
+  outline: 1px dotted var(--text);
+  outline-offset: -6px;
+}
+
+.sunken {
+  background: var(--white);
+  border: 2px solid;
+  border-color: #808080 #ffffff #ffffff #808080;
+  box-shadow: inset 1px 1px 0 #404040;
+}
+
+/* ── Range and timeline ─────────────────────────────────────────────────── */
+
+.range {
+  margin: 0 0 8px;
+  font-family: var(--pixel);
+  font-size: 24px;
+  line-height: 1.2;
+  color: var(--navy);
+}
+
+.timeline {
+  position: relative;
+  height: 22px;
+}
+
+.timeline-block {
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  min-width: 6px;
+  background: var(--navy);
+}
+
+.timeline-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+/* ── Question ───────────────────────────────────────────────────────────── */
+
+.question {
+  margin: 48px 0 0;
+  font-family: var(--pixel);
+  font-size: 36px;
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.fact {
+  margin: 12px 0 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+.answers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.answer {
+  min-height: 60px;
+  padding: 6px 8px;
+  font-family: var(--pixel);
+  font-size: 21px;
+  line-height: 1.1;
+}
+
+.skip {
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 14px;
+  color: var(--text-3);
+  cursor: pointer;
+}
+
+.skip:focus-visible {
+  outline: 1px dotted var(--text);
+}
+
+/* ── What we know ───────────────────────────────────────────────────────── */
+
+.known {
+  margin-top: auto;
+  padding-top: 24px;
+}
+
+.known-label {
+  margin: 0 0 6px;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.known-list {
+  height: 168px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  scrollbar-color: #c0c0c0 #dfdfdf;
+}
+
+.known-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 7px 8px;
+  border: 0;
+  background: none;
+  font-size: 15px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.known-row:hover {
+  background: #efefef;
+}
+
+.known-row:focus-visible {
+  outline: 1px dotted var(--text);
+  outline-offset: -2px;
+}
+
+.known-years {
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+/* Chunky retro scrollbar (Chrome, Safari, Edge). */
+.known-list::-webkit-scrollbar {
+  width: 18px;
+}
+
+.known-list::-webkit-scrollbar-track {
+  background-color: #dfdfdf;
+  background-image: conic-gradient(#c0c0c0 25%, transparent 0 50%, #c0c0c0 0 75%, transparent 0);
+  background-size: 2px 2px;
+}
+
+.known-list::-webkit-scrollbar-thumb {
+  background: var(--bg);
+  border: 2px solid;
+  border-color: #ffffff #404040 #404040 #ffffff;
+  box-shadow: inset -1px -1px 0 #808080, inset 1px 1px 0 #dfdfdf;
+}

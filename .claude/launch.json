@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "date-my-map",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["/Users/talishalaby/Desktop/tinker/date-my-map/scripts/serve.js"],
+      "port": 8417
+    }
+  ]
+}
