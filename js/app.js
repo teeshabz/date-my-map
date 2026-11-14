@@ -156,6 +156,11 @@ function welcomeScreen() {
     h("h1", { class: "title" }, "Date my map"),
     h("p", { class: "tagline" }, "knowledge is power."),
     h("button", { class: "start raised", onclick: startDating }, "Let's date this thing"),
+    h(
+      "a",
+      { class: "credit", href: "https://www.instagram.com/p/Dfh0YlIhAyV/", target: "_blank", rel: "noopener" },
+      "@tali.files",
+    ),
   );
 }
 
@@ -191,7 +196,7 @@ function resultScreen(range) {
     h("p", { class: "range range-big" }, formatRange(range, NOW)),
     timeline(range),
     knownBox("How we know", "known-result"),
-    h("button", { class: "again raised", onclick: startDating }, "Date another map"),
+    h("button", { class: "again raised", onclick: goHome }, "Date another map"),
   );
 }
 
