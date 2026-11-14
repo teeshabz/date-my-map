@@ -36,13 +36,12 @@ function h(tag, attrs = {}, ...children) {
 }
 
 // ── Pop-up notes ───────────────────────────────────────────────────────────
-// "Down to 1 decade!" shows on the page right after the answer that first
+// "down to 1 decade!" shows on the page right after the answer that first
 // narrows the range to 10 years or less. Otherwise the fun lines sit on fixed
-// question numbers. The result page always gets "Case closed!".
+// question numbers. The result page always gets "case closed!".
 
 const FUN_LINE_ON_QUESTION = {
   2: "isn't this fun",
-  4: "bet you didn't know that huh",
   6: "hope ur having a good day",
 };
 
@@ -51,7 +50,7 @@ function noteForQuestion() {
   if (last && last.choice !== "skip") {
     const before = rangeOf(history.slice(0, -1));
     const after = rangeOf(history);
-    if (after.hi - after.lo <= 10 && before.hi - before.lo > 10) return "Down to 1 decade!";
+    if (after.hi - after.lo <= 10 && before.hi - before.lo > 10) return "down to 1 decade!";
   }
   return FUN_LINE_ON_QUESTION[history.length + 1] ?? null;
 }
@@ -172,7 +171,7 @@ function worldMap() {
     h("span", { class: "crop crop-tl", "aria-hidden": "true" }),
     h("span", { class: "crop crop-bl", "aria-hidden": "true" }),
     h("span", { class: "crop crop-br", "aria-hidden": "true" }),
-    burst("Case closed!", "note-on-map"),
+    burst("case closed!", "note-on-map"),
   );
 }
 
@@ -241,7 +240,7 @@ function render() {
     page = clue ? questionScreen(clue, range) : resultScreen(range);
   }
   app.replaceChildren(page);
-  // The result page gets the win jingle; its "Case closed!" burst pops in
+  // The result page gets the win jingle; its "case closed!" burst pops in
   // silently so the two sounds don't overlap.
   if (page.classList.contains("result")) playWin();
   else if (page.querySelector(".note")) popSoon();
