@@ -158,7 +158,7 @@ function welcomeScreen() {
     h("button", { class: "start raised", onclick: startDating }, "Let's date this thing"),
     h(
       "a",
-      { class: "credit", href: "https://www.instagram.com/p/Dfh0YlIhAyV/", target: "_blank", rel: "noopener" },
+      { class: "credit", href: "https://www.instagram.com/tali.files/", target: "_blank", rel: "noopener" },
       "@tali.files",
     ),
   );
