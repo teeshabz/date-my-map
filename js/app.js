@@ -3,7 +3,8 @@
 import { clues, EARLIEST } from "../data/clues.js";
 import { currentRange, nextClue, knownList, formatRange, formatAnswerYears } from "./logic.js";
 import { playClick } from "./sound.js";
-import { showNote } from "./notes.js";
+import { burst, popSoon, cancelPop } from "./notes.js";
+import { worldMapSvg } from "./worldmap.js";
 
 const NOW = new Date().getFullYear();
 const clueById = Object.fromEntries(clues.map((c) => [c.id, c]));
@@ -21,6 +22,8 @@ document.addEventListener("click", (event) => {
 let screen = "welcome";
 let history = [];
 
+const rangeOf = (hist) => currentRange(hist, clueById, EARLIEST, NOW);
+
 // Tiny helper for building elements: h("p", { class: "fact" }, "text").
 function h(tag, attrs = {}, ...children) {
   const el = document.createElement(tag);
@@ -33,35 +36,24 @@ function h(tag, attrs = {}, ...children) {
 }
 
 // ── Pop-up notes ───────────────────────────────────────────────────────────
-// Kept rare: "Down to 1 decade!" the first time the range gets that narrow,
-// and otherwise a fun line now and then. Never after the first answer. Fun
-// lines never show two answers in a row, and each at most once per map.
+// "Down to 1 decade!" shows on the page right after the answer that first
+// narrows the range to 10 years or less. Otherwise the fun lines sit on fixed
+// question numbers. The result page always gets "Case closed!".
 
-const FUN_LINES = ["isn't this fun", "bet you didn't know that huh", "hope ur having a good day"];
-const FUN_CHANCE = 0.4;
+const FUN_LINE_ON_QUESTION = {
+  2: "isn't this fun",
+  4: "bet you didn't know that huh",
+  6: "hope ur having a good day",
+};
 
-let notes;
-
-function resetNotes() {
-  notes = { funLeft: [...FUN_LINES], lastAt: -Infinity, decadeShown: false };
-}
-
-function maybeShowNote(before, after) {
-  const answered = history.filter((h) => h.choice !== "skip").length;
-  if (answered < 2) return;
-
-  let text = null;
-  if (!notes.decadeShown && after.hi - after.lo <= 10 && before.hi - before.lo > 10) {
-    notes.decadeShown = true;
-    text = "Down to 1 decade!";
-  } else if (answered - notes.lastAt >= 2 && notes.funLeft.length && Math.random() < FUN_CHANCE) {
-    const pick = Math.floor(Math.random() * notes.funLeft.length);
-    text = notes.funLeft.splice(pick, 1)[0];
+function noteForQuestion() {
+  const last = history.at(-1);
+  if (last && last.choice !== "skip") {
+    const before = rangeOf(history.slice(0, -1));
+    const after = rangeOf(history);
+    if (after.hi - after.lo <= 10 && before.hi - before.lo > 10) return "Down to 1 decade!";
   }
-  if (text) {
-    notes.lastAt = answered;
-    showNote(text);
-  }
+  return FUN_LINE_ON_QUESTION[history.length + 1] ?? null;
 }
 
 // ── Actions ────────────────────────────────────────────────────────────────
@@ -69,7 +61,6 @@ function maybeShowNote(before, after) {
 function startDating() {
   screen = "dating";
   history = [];
-  resetNotes();
   render();
 }
 
@@ -80,10 +71,8 @@ function goHome() {
 }
 
 function answer(clue, choice) {
-  const before = currentRange(history, clueById, EARLIEST, NOW);
   history = [...history, { id: clue.id, choice }];
   render();
-  if (choice !== "skip") maybeShowNote(before, currentRange(history, clueById, EARLIEST, NOW));
 }
 
 // Tapping a "What we know" row goes back to that question and clears every
@@ -142,6 +131,21 @@ function knownBox(label, extraClass = "") {
   );
 }
 
+// The framed pixel map with crop marks, for the result screen.
+function worldMap() {
+  const frame = h("div", { class: "map-frame sunken" });
+  frame.innerHTML = worldMapSvg();
+  return h(
+    "div",
+    { class: "map" },
+    frame,
+    h("span", { class: "crop crop-tl", "aria-hidden": "true" }),
+    h("span", { class: "crop crop-bl", "aria-hidden": "true" }),
+    h("span", { class: "crop crop-br", "aria-hidden": "true" }),
+    burst("Case closed!", "note-on-map"),
+  );
+}
+
 // ── Screens ────────────────────────────────────────────────────────────────
 
 function welcomeScreen() {
@@ -156,10 +160,12 @@ function welcomeScreen() {
 }
 
 function questionScreen(clue, range) {
+  const note = noteForQuestion();
   return h(
     "div",
     { class: "screen" },
     homeButton(),
+    ...(note ? [burst(note, "note-corner")] : []),
     h("p", { class: "range", "aria-live": "polite" }, formatRange(range, NOW)),
     timeline(range),
     h("h1", { class: "question" }, clue.question),
@@ -178,8 +184,9 @@ function questionScreen(clue, range) {
 function resultScreen(range) {
   return h(
     "div",
-    { class: "screen" },
+    { class: "screen result" },
     homeButton(),
+    worldMap(),
     h("p", { class: "result-intro" }, "Your map was made between"),
     h("p", { class: "range range-big" }, formatRange(range, NOW)),
     timeline(range),
@@ -189,13 +196,17 @@ function resultScreen(range) {
 }
 
 function render() {
+  cancelPop();
+  let page;
   if (screen === "welcome") {
-    app.replaceChildren(welcomeScreen());
+    page = welcomeScreen();
   } else {
-    const range = currentRange(history, clueById, EARLIEST, NOW);
+    const range = rangeOf(history);
     const clue = nextClue(history, clues, clueById, EARLIEST, NOW);
-    app.replaceChildren(clue ? questionScreen(clue, range) : resultScreen(range));
+    page = clue ? questionScreen(clue, range) : resultScreen(range);
   }
+  app.replaceChildren(page);
+  if (page.querySelector(".note")) popSoon();
   window.scrollTo(0, 0);
 }
 

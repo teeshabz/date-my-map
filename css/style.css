@@ -213,6 +213,79 @@ button {
 
 /* ── Result ─────────────────────────────────────────────────────────────── */
 
+.result {
+  text-align: center;
+}
+
+.result .timeline-labels,
+.result .known {
+  text-align: left;
+}
+
+/* The framed pixel map, with crop marks and the "Case closed!" burst. */
+.map {
+  position: relative;
+  margin: 24px 14px 36px;
+}
+
+.map-frame {
+  display: block;
+  line-height: 0;
+}
+
+.map-frame svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Crop marks: chunky black plus signs, deliberately a little off-square. */
+.crop {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+}
+
+.crop::before,
+.crop::after {
+  content: "";
+  position: absolute;
+  background: var(--text);
+}
+
+.crop::before {
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  transform: translateY(-50%);
+}
+
+.crop::after {
+  top: 0;
+  left: 50%;
+  width: 3px;
+  height: 100%;
+  transform: translateX(-50%);
+}
+
+.crop-tl {
+  top: -20px;
+  left: -16px;
+}
+
+.crop-bl {
+  bottom: -30px;
+  left: -6px;
+  width: 16px;
+  height: 16px;
+}
+
+.crop-br {
+  right: -16px;
+  bottom: -24px;
+}
+
 .result-intro {
   margin: 0 0 4px;
   font-size: 16px;
@@ -220,17 +293,18 @@ button {
 }
 
 .range-big {
+  margin-bottom: 20px;
   font-size: 60px;
   line-height: 1.05;
 }
 
 .known.known-result {
   margin: 0 0 24px;
-  padding-top: 40px;
+  padding-top: 32px;
 }
 
 .known-result .known-list {
-  height: 290px;
+  height: 250px;
 }
 
 .again {
@@ -243,29 +317,18 @@ button {
 
 /* ── Pop-up notes ───────────────────────────────────────────────────────── */
 
-/* A layer the width of the app column, so notes sit in its top right corner
-   on any screen size. It never takes taps. */
-.note-layer {
-  position: fixed;
-  top: 0;
-  left: 50%;
-  z-index: 10;
-  width: min(100%, 430px);
-  height: 0;
-  transform: translateX(-50%);
-  pointer-events: none;
-}
-
+/* A note pops in a second after its page appears and stays put. It never
+   takes taps or moves the layout. The 1s delay matches DELAY_MS in notes.js. */
 .note {
   position: absolute;
-  top: 10px;
-  right: 6px;
+  z-index: 5;
   display: grid;
   place-items: center;
-  width: 130px;
-  height: 96px;
+  width: 124px;
+  height: 92px;
+  pointer-events: none;
   transform: rotate(8deg);
-  animation: note-in 220ms cubic-bezier(0.3, 1.6, 0.6, 1) both;
+  animation: note-in 220ms cubic-bezier(0.3, 1.6, 0.6, 1) 1s both;
 }
 
 .note svg {
@@ -277,15 +340,23 @@ button {
 
 .note-text {
   position: relative;
-  max-width: 78px;
+  max-width: 64px;
   font-family: var(--pixel);
   font-size: 12px;
   line-height: 1.25;
   text-align: center;
 }
 
-.note-out {
-  animation: note-out 350ms ease-in both;
+/* On question pages: the top right corner. */
+.note-corner {
+  top: 10px;
+  right: 6px;
+}
+
+/* On the result page: overlapping the map's top right corner. */
+.note-on-map {
+  top: -46px;
+  right: -30px;
 }
 
 @keyframes note-in {
@@ -295,17 +366,9 @@ button {
   }
 }
 
-@keyframes note-out {
-  to {
-    opacity: 0;
-    transform: rotate(8deg) scale(0.9);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .note,
-  .note-out {
-    animation-duration: 1ms;
+  .note {
+    animation: none;
   }
 }
 

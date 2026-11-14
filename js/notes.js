@@ -1,11 +1,12 @@
-// Date My Map: the comic-burst pop-up notes in the top right.
+// Date My Map: the comic-burst pop-up notes.
 //
-// Notes live in their own layer outside the screens, so re-drawing a screen
-// never removes one early, and they never move the layout or need dismissing.
+// A note belongs to the page it's on: it pops in about a second after the
+// page appears and stays until the user moves on. It never moves the layout
+// and never needs dismissing.
 
 import { playPop } from "./sound.js";
 
-const SHOW_MS = 2600;
+const DELAY_MS = 1000; // keep in step with the animation delay in style.css
 
 // The zigzag burst outline: a star with many short points, squashed into an
 // oval so it's wider than it is tall.
@@ -28,36 +29,28 @@ const BURST_SVG = `
     <polygon points="${burstPoints(130, 96)}" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-linejoin="miter" />
   </svg>`;
 
-let layer = null;
-let current = null;
-
-function getLayer() {
-  if (!layer) {
-    layer = document.createElement("div");
-    layer.className = "note-layer";
-    layer.setAttribute("aria-live", "polite");
-    document.body.append(layer);
-  }
-  return layer;
-}
-
-export function showNote(text) {
-  current?.remove();
-
+// The note element. Where it sits is up to the page's CSS (via extraClass).
+export function burst(text, extraClass = "") {
   const note = document.createElement("div");
-  note.className = "note";
+  note.className = `note ${extraClass}`.trim();
+  note.setAttribute("role", "status");
   note.innerHTML = BURST_SVG;
   const label = document.createElement("span");
   label.className = "note-text";
   label.textContent = text;
   note.append(label);
+  return note;
+}
 
-  getLayer().append(note);
-  current = note;
-  playPop();
+// The pop sound, timed to land with the note. Re-drawing the page cancels a
+// pop that hasn't played yet.
+let popTimer = null;
 
-  setTimeout(() => {
-    note.classList.add("note-out");
-    setTimeout(() => note.remove(), 400);
-  }, SHOW_MS);
+export function popSoon() {
+  clearTimeout(popTimer);
+  popTimer = setTimeout(playPop, DELAY_MS);
+}
+
+export function cancelPop() {
+  clearTimeout(popTimer);
 }
