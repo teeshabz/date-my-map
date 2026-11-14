@@ -2,7 +2,7 @@
 
 import { clues, EARLIEST } from "../data/clues.js";
 import { currentRange, nextClue, knownList, formatRange, formatAnswerYears } from "./logic.js";
-import { playClick } from "./sound.js";
+import { playClick, playWin } from "./sound.js";
 import { burst, popSoon, cancelPop } from "./notes.js";
 import { worldMapSvg } from "./worldmap.js";
 
@@ -172,7 +172,7 @@ function welcomeScreen() {
     { class: "screen welcome" },
     mascot("welcome-mascot"),
     h("h1", { class: "title" }, "Date my map"),
-    h("p", { class: "tagline" }, "knowledge is power."),
+    h("p", { class: "tagline" }, "what year is your map from?"),
     h("button", { class: "start raised", onclick: startDating }, "Let's date this thing"),
     h(
       "a",
@@ -229,7 +229,10 @@ function render() {
     page = clue ? questionScreen(clue, range) : resultScreen(range);
   }
   app.replaceChildren(page);
-  if (page.querySelector(".note")) popSoon();
+  // The result page gets the win jingle; its "Case closed!" burst pops in
+  // silently so the two sounds don't overlap.
+  if (page.classList.contains("result")) playWin();
+  else if (page.querySelector(".note")) popSoon();
   window.scrollTo(0, 0);
 }
 
