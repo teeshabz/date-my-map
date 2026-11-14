@@ -7,7 +7,10 @@ const NOW = new Date().getFullYear();
 const clueById = Object.fromEntries(clues.map((c) => [c.id, c]));
 const app = document.getElementById("app");
 
-// The only state: what the user has tapped so far.
+// The whole state: which screen we're on, and what the user has tapped so far.
+// While dating, the question and result screens are both worked out from the
+// history (no next question means we're done).
+let screen = "welcome";
 let history = [];
 
 // Tiny helper for building elements: h("p", { class: "fact" }, "text").
@@ -19,6 +22,18 @@ function h(tag, attrs = {}, ...children) {
   }
   el.append(...children);
   return el;
+}
+
+function startDating() {
+  screen = "dating";
+  history = [];
+  render();
+}
+
+function goHome() {
+  screen = "welcome";
+  history = [];
+  render();
 }
 
 function answer(clue, choice) {
@@ -34,6 +49,16 @@ function goBackTo(index) {
 }
 
 // ── Pieces ─────────────────────────────────────────────────────────────────
+
+function mascot(className) {
+  return h("img", { class: className, src: "assets/mascot.svg", alt: "" });
+}
+
+// The small mascot at the top of the question and result screens. Tapping it
+// starts over from the welcome screen.
+function homeButton() {
+  return h("button", { class: "home", onclick: goHome, "aria-label": "Start over" }, mascot("home-mascot"));
+}
 
 function timeline(range) {
   const span = NOW - EARLIEST;
@@ -51,7 +76,7 @@ function timeline(range) {
   );
 }
 
-function knownBox(label) {
+function knownBox(label, extraClass = "") {
   const rows = knownList(history, clueById).map((row) =>
     h(
       "li",
@@ -66,7 +91,7 @@ function knownBox(label) {
   );
   return h(
     "section",
-    { class: "known" },
+    { class: `known ${extraClass}`.trim() },
     h("p", { class: "known-label" }, label),
     h("ul", { class: "known-list sunken" }, ...rows),
   );
@@ -74,10 +99,22 @@ function knownBox(label) {
 
 // ── Screens ────────────────────────────────────────────────────────────────
 
+function welcomeScreen() {
+  return h(
+    "div",
+    { class: "screen welcome" },
+    mascot("welcome-mascot"),
+    h("h1", { class: "title" }, "Date my map"),
+    h("p", { class: "tagline" }, "knowledge is power."),
+    h("button", { class: "start raised", onclick: startDating }, "Let's date this thing"),
+  );
+}
+
 function questionScreen(clue, range) {
   return h(
     "div",
     { class: "screen" },
+    homeButton(),
     h("p", { class: "range", "aria-live": "polite" }, formatRange(range, NOW)),
     timeline(range),
     h("h1", { class: "question" }, clue.question),
@@ -93,21 +130,28 @@ function questionScreen(clue, range) {
   );
 }
 
-// Placeholder until the result screen is built (step 3).
 function resultScreen(range) {
   return h(
     "div",
     { class: "screen" },
-    h("p", { class: "range" }, formatRange(range, NOW)),
+    homeButton(),
+    h("p", { class: "result-intro" }, "Your map was made between"),
+    h("p", { class: "range range-big" }, formatRange(range, NOW)),
     timeline(range),
-    knownBox("How we know"),
+    knownBox("How we know", "known-result"),
+    h("button", { class: "again raised", onclick: startDating }, "Date another map"),
   );
 }
 
 function render() {
-  const range = currentRange(history, clueById, EARLIEST, NOW);
-  const clue = nextClue(history, clues, clueById, EARLIEST, NOW);
-  app.replaceChildren(clue ? questionScreen(clue, range) : resultScreen(range));
+  if (screen === "welcome") {
+    app.replaceChildren(welcomeScreen());
+  } else {
+    const range = currentRange(history, clueById, EARLIEST, NOW);
+    const clue = nextClue(history, clues, clueById, EARLIEST, NOW);
+    app.replaceChildren(clue ? questionScreen(clue, range) : resultScreen(range));
+  }
+  window.scrollTo(0, 0);
 }
 
 render();

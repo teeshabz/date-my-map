@@ -34,6 +34,7 @@ button {
 /* ── Screen ─────────────────────────────────────────────────────────────── */
 
 .screen {
+  position: relative;
   display: flex;
   flex-direction: column;
   max-width: 430px;
@@ -70,6 +71,66 @@ button {
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
   box-shadow: inset 1px 1px 0 #404040;
+}
+
+/* ── Welcome ────────────────────────────────────────────────────────────── */
+
+.welcome {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.welcome-mascot {
+  width: 128px;
+  height: auto;
+}
+
+.title {
+  margin: 28px 0 0;
+  font-family: var(--pixel);
+  font-size: 44px;
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.tagline {
+  margin: 6px 0 36px;
+  font-size: 16px;
+  color: var(--text-2);
+}
+
+.start {
+  width: 100%;
+  min-height: 76px;
+  font-family: var(--pixel);
+  font-size: 24px;
+}
+
+/* ── Start-over mascot (top middle) ─────────────────────────────────────── */
+
+.home {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.home:focus-visible {
+  outline: 1px dotted var(--text);
+}
+
+.home-mascot {
+  width: 40px;
+  height: auto;
 }
 
 /* ── Range and timeline ─────────────────────────────────────────────────── */
@@ -148,6 +209,36 @@ button {
 
 .skip:focus-visible {
   outline: 1px dotted var(--text);
+}
+
+/* ── Result ─────────────────────────────────────────────────────────────── */
+
+.result-intro {
+  margin: 0 0 4px;
+  font-size: 16px;
+  color: var(--text-2);
+}
+
+.range-big {
+  font-size: 60px;
+  line-height: 1.05;
+}
+
+.known.known-result {
+  margin: 0 0 24px;
+  padding-top: 40px;
+}
+
+.known-result .known-list {
+  height: 290px;
+}
+
+.again {
+  width: 100%;
+  min-height: 60px;
+  margin-top: auto;
+  font-family: var(--pixel);
+  font-size: 22px;
 }
 
 /* ── What we know ───────────────────────────────────────────────────────── */
