@@ -2,10 +2,18 @@
 
 import { clues, EARLIEST } from "../data/clues.js";
 import { currentRange, nextClue, knownList, formatRange, formatAnswerYears } from "./logic.js";
+import { playClick } from "./sound.js";
+import { showNote } from "./notes.js";
 
 const NOW = new Date().getFullYear();
 const clueById = Object.fromEntries(clues.map((c) => [c.id, c]));
 const app = document.getElementById("app");
+
+// Every button tap clicks. Listening in the capture phase plays the sound
+// before the tap re-draws the screen.
+document.addEventListener("click", (event) => {
+  if (event.target.closest("button")) playClick();
+}, true);
 
 // The whole state: which screen we're on, and what the user has tapped so far.
 // While dating, the question and result screens are both worked out from the
@@ -24,9 +32,44 @@ function h(tag, attrs = {}, ...children) {
   return el;
 }
 
+// ── Pop-up notes ───────────────────────────────────────────────────────────
+// Kept rare: "Down to 1 decade!" the first time the range gets that narrow,
+// and otherwise a fun line now and then. Never after the first answer. Fun
+// lines never show two answers in a row, and each at most once per map.
+
+const FUN_LINES = ["isn't this fun", "bet you didn't know that huh", "hope ur having a good day"];
+const FUN_CHANCE = 0.4;
+
+let notes;
+
+function resetNotes() {
+  notes = { funLeft: [...FUN_LINES], lastAt: -Infinity, decadeShown: false };
+}
+
+function maybeShowNote(before, after) {
+  const answered = history.filter((h) => h.choice !== "skip").length;
+  if (answered < 2) return;
+
+  let text = null;
+  if (!notes.decadeShown && after.hi - after.lo <= 10 && before.hi - before.lo > 10) {
+    notes.decadeShown = true;
+    text = "Down to 1 decade!";
+  } else if (answered - notes.lastAt >= 2 && notes.funLeft.length && Math.random() < FUN_CHANCE) {
+    const pick = Math.floor(Math.random() * notes.funLeft.length);
+    text = notes.funLeft.splice(pick, 1)[0];
+  }
+  if (text) {
+    notes.lastAt = answered;
+    showNote(text);
+  }
+}
+
+// ── Actions ────────────────────────────────────────────────────────────────
+
 function startDating() {
   screen = "dating";
   history = [];
+  resetNotes();
   render();
 }
 
@@ -37,8 +80,10 @@ function goHome() {
 }
 
 function answer(clue, choice) {
+  const before = currentRange(history, clueById, EARLIEST, NOW);
   history = [...history, { id: clue.id, choice }];
   render();
+  if (choice !== "skip") maybeShowNote(before, currentRange(history, clueById, EARLIEST, NOW));
 }
 
 // Tapping a "What we know" row goes back to that question and clears every
