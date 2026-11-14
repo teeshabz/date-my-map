@@ -196,6 +196,18 @@ button {
   color: var(--text-2);
 }
 
+/* Inline at the end of the fun fact. */
+.learn-more {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+
+.learn-more:focus-visible {
+  outline: 1px dotted var(--text);
+}
+
 .answers {
   display: grid;
   grid-template-columns: 1fr 1fr;

@@ -120,21 +120,21 @@ function questionRow(row) {
   );
 }
 
-// On the result, each row links to its Wikipedia article (in a new tab).
+// "learn more ↗": opens the clue's Wikipedia article in a new tab.
+function learnMore(wiki, className) {
+  return h(
+    "a",
+    { class: className, href: `https://en.wikipedia.org/wiki/${encodeURIComponent(wiki)}`, target: "_blank", rel: "noopener" },
+    "learn more ↗",
+  );
+}
+
+// On the result, each row links to its Wikipedia article.
 function resultRow(row) {
   return h(
     "div",
     { class: "known-row known-row-result" },
-    h(
-      "span",
-      {},
-      row.clue,
-      h(
-        "a",
-        { class: "read-more", href: `https://en.wikipedia.org/wiki/${encodeURIComponent(row.wiki)}`, target: "_blank", rel: "noopener" },
-        "Read more",
-      ),
-    ),
+    h("span", {}, row.clue, learnMore(row.wiki, "read-more")),
     h("span", { class: "known-years" }, formatAnswerYears(row.from, row.to)),
   );
 }
@@ -192,7 +192,7 @@ function questionScreen(clue, range) {
     h("p", { class: "range", "aria-live": "polite" }, formatRange(range, NOW)),
     timeline(range),
     h("h1", { class: "question" }, clue.question),
-    h("p", { class: "fact" }, clue.fact),
+    h("p", { class: "fact" }, clue.fact, " ", learnMore(clue.wiki, "learn-more")),
     h(
       "div",
       { class: "answers" },
