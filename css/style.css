@@ -196,6 +196,14 @@ button {
   color: var(--text-2);
 }
 
+/* The drawn ↗ arrow in "learn more ↗". */
+.arrow {
+  display: inline-block;
+  width: 0.75em;
+  height: 0.75em;
+  vertical-align: 0.05em;
+}
+
 /* Inline at the end of the fun fact. */
 .learn-more {
   color: inherit;
