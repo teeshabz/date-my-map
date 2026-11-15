@@ -78,6 +78,14 @@ test("every clue has a Wikipedia article for Read more", () => {
   }
 });
 
+test("every clue has a timeline title and a real location", () => {
+  for (const clue of clues) {
+    assert.ok(clue.title, `${clue.id} has no title`);
+    const [lat, lon] = clue.place ?? [];
+    assert.ok(Math.abs(lat) <= 90 && Math.abs(lon) <= 180, `${clue.id} has no valid place`);
+  }
+});
+
 test("display text", () => {
   assert.equal(formatRange({ lo: 1971, hi: 1990 }, NOW), "1971–1990");
   assert.equal(formatRange({ lo: 1990, hi: 1990 }, NOW), "1990");

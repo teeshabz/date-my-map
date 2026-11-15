@@ -4,7 +4,9 @@ import { clues, EARLIEST } from "../data/clues.js";
 import { currentRange, nextClue, knownList, formatRange, formatAnswerYears } from "./logic.js";
 import { playClick, playWin } from "./sound.js";
 import { burst, popSoon, cancelPop } from "./notes.js";
-import { worldMapSvg } from "./worldmap.js";
+import { pixelMapSvg } from "./pixelmap.js";
+import { h, svgBox, mascot, learnMore, timelineLink } from "./ui.js";
+import { timelineScreen } from "./timeline.js";
 
 const NOW = new Date().getFullYear();
 const clueById = Object.fromEntries(clues.map((c) => [c.id, c]));
@@ -18,22 +20,14 @@ document.addEventListener("click", (event) => {
 
 // The whole state: which screen we're on, and what the user has tapped so far.
 // While dating, the question and result screens are both worked out from the
-// history (no next question means we're done).
+// history (no next question means we're done). The timeline lives at its own
+// address (#timeline) and sits on top of whatever screen you came from, so
+// the back button returns there.
 let screen = "welcome";
 let history = [];
 
 const rangeOf = (hist) => currentRange(hist, clueById, EARLIEST, NOW);
-
-// Tiny helper for building elements: h("p", { class: "fact" }, "text").
-function h(tag, attrs = {}, ...children) {
-  const el = document.createElement(tag);
-  for (const [key, value] of Object.entries(attrs)) {
-    if (key.startsWith("on")) el.addEventListener(key.slice(2), value);
-    else el.setAttribute(key, value);
-  }
-  el.append(...children);
-  return el;
-}
+const onTimeline = () => location.hash === "#timeline";
 
 // ── Pop-up notes ───────────────────────────────────────────────────────────
 // "down to 1 decade!" shows on the page right after the answer that first
@@ -63,15 +57,20 @@ function startDating() {
   render();
 }
 
+// Back to the welcome screen from anywhere, including the timeline.
 function goHome() {
   screen = "welcome";
   history = [];
+  if (onTimeline()) window.history.pushState(null, "", location.pathname + location.search);
   render();
 }
 
 function answer(clue, choice) {
   history = [...history, { id: clue.id, choice }];
   render();
+  // Arriving at the result by answering gets the win jingle. (Coming back to
+  // it from the timeline doesn't.)
+  if (app.querySelector(".result")) playWin();
 }
 
 // Tapping a "What we know" row goes back to that question and clears every
@@ -83,14 +82,9 @@ function goBackTo(index) {
 
 // ── Pieces ─────────────────────────────────────────────────────────────────
 
-function mascot(className) {
-  return h("img", { class: className, src: "assets/mascot.svg", alt: "" });
-}
-
-// The small mascot at the top of the question and result screens. Tapping it
-// starts over from the welcome screen.
+// The small mascot at the top of every screen but the welcome screen.
 function homeButton() {
-  return h("button", { class: "home", onclick: goHome, "aria-label": "Start over" }, mascot("home-mascot"));
+  return h("button", { class: "home", onclick: goHome, "aria-label": "Home" }, mascot("home-mascot"));
 }
 
 function timeline(range) {
@@ -119,27 +113,6 @@ function questionRow(row) {
   );
 }
 
-// The ↗ arrow, drawn as a tiny SVG. The text character "↗" shows up as a
-// colour emoji on iPhones, so it's drawn instead, in the text's own colour.
-function arrowIcon() {
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("class", "arrow");
-  svg.setAttribute("viewBox", "0 0 10 10");
-  svg.setAttribute("aria-hidden", "true");
-  svg.innerHTML = '<path d="M2 8 L8 2 M3.5 2 H8 V6.5" fill="none" stroke="currentColor" stroke-width="1.5" />';
-  return svg;
-}
-
-// "learn more ↗": opens the clue's Wikipedia article in a new tab.
-function learnMore(wiki, className) {
-  return h(
-    "a",
-    { class: className, href: `https://en.wikipedia.org/wiki/${encodeURIComponent(wiki)}`, target: "_blank", rel: "noopener" },
-    "learn more ",
-    arrowIcon(),
-  );
-}
-
 // On the result, each row links to its Wikipedia article.
 function resultRow(row) {
   return h(
@@ -160,17 +133,16 @@ function knownBox(label, makeRow, extraClass = "") {
   );
 }
 
-// The framed pixel map with crop marks, for the result screen.
+// The result screen's framed pixel map: it fills in a few rows at a time, the
+// three sparkles blink, then the "case closed!" burst pops in.
 function worldMap() {
-  const frame = h("div", { class: "map-frame sunken" });
-  frame.innerHTML = worldMapSvg();
   return h(
     "div",
     { class: "map" },
-    frame,
-    h("span", { class: "crop crop-tl", "aria-hidden": "true" }),
-    h("span", { class: "crop crop-bl", "aria-hidden": "true" }),
-    h("span", { class: "crop crop-br", "aria-hidden": "true" }),
+    svgBox("map-frame sunken", pixelMapSvg({ grid: true, animate: true, label: "Pixel world map" })),
+    h("span", { class: "sparkle sparkle-tl", "aria-hidden": "true" }),
+    h("span", { class: "sparkle sparkle-bl", "aria-hidden": "true" }),
+    h("span", { class: "sparkle sparkle-br", "aria-hidden": "true" }),
     burst("case closed!", "note-on-map"),
   );
 }
@@ -185,6 +157,7 @@ function welcomeScreen() {
     h("h1", { class: "title" }, "Date my map"),
     h("p", { class: "tagline" }, "what year is your map from?"),
     h("button", { class: "start raised", onclick: startDating }, "Let's find out"),
+    timelineLink("or see the timeline of map changes"),
     h(
       "a",
       { class: "credit", href: "https://www.instagram.com/tali.files/", target: "_blank", rel: "noopener" },
@@ -203,7 +176,7 @@ function questionScreen(clue, range) {
     h("p", { class: "range", "aria-live": "polite" }, formatRange(range, NOW)),
     timeline(range),
     h("h1", { class: "question" }, clue.question),
-    h("p", { class: "fact" }, clue.fact, " ", learnMore(clue.wiki, "learn-more")),
+    h("p", { class: "fact" }, clue.fact, " ", learnMore(clue.wiki)),
     h(
       "div",
       { class: "answers" },
@@ -226,13 +199,16 @@ function resultScreen(range) {
     timeline(range),
     knownBox("How we know", resultRow, "known-result"),
     h("button", { class: "again raised", onclick: goHome }, "Date another map"),
+    timelineLink("see the timeline of map changes"),
   );
 }
 
 function render() {
   cancelPop();
   let page;
-  if (screen === "welcome") {
+  if (onTimeline()) {
+    page = timelineScreen(homeButton());
+  } else if (screen === "welcome") {
     page = welcomeScreen();
   } else {
     const range = rangeOf(history);
@@ -240,11 +216,11 @@ function render() {
     page = clue ? questionScreen(clue, range) : resultScreen(range);
   }
   app.replaceChildren(page);
-  // The result page gets the win jingle; its "case closed!" burst pops in
-  // silently so the two sounds don't overlap.
-  if (page.classList.contains("result")) playWin();
-  else if (page.querySelector(".note")) popSoon();
+  // Question pages pop their note with a sound. The result page's burst pops
+  // in silently, since it comes with the win jingle.
+  if (page.querySelector(".note") && !page.classList.contains("result")) popSoon();
   window.scrollTo(0, 0);
 }
 
+window.addEventListener("hashchange", render);
 render();
