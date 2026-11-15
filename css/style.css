@@ -573,6 +573,25 @@ html::-webkit-scrollbar-thumb,
   padding: 56px 20px 48px;
 }
 
+/* On a phone the home mascot stays pinned at the top while you scroll, on a
+   grey strip so cards slide underneath it. */
+.tl-page::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 3;
+  height: 52px;
+  background: var(--bg);
+}
+
+.tl-page .home {
+  position: fixed;
+  top: 4px;
+  z-index: 4;
+}
+
 .tl-heading {
   margin: 8px 0 0;
   font-family: var(--pixel);
@@ -591,10 +610,11 @@ html::-webkit-scrollbar-thumb,
   display: none;
 }
 
-/* Decade headers stick to the top while their events scroll past. */
+/* Decade headers stick just under the pinned mascot while their events
+   scroll past. */
 .tl-decade {
   position: sticky;
-  top: 0;
+  top: 52px;
   z-index: 2;
   margin: 0;
   padding: 12px 0 6px;
@@ -708,7 +728,13 @@ html::-webkit-scrollbar-thumb,
     border-right: 1px solid #808080;
   }
 
-  .tl-sidebar .home {
+  /* The sidebar doesn't scroll, so the mascot just sits at its top. */
+  .tl-page::before {
+    display: none;
+  }
+
+  .tl-page .home {
+    position: absolute;
     top: 16px;
     left: 32px;
     transform: none;
